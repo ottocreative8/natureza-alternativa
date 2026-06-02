@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natureza Alternativa — Painel Redes Sociais</title>
+<style>
+  :root {
+    --verde: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-bg: #d8f3dc;
+    --amarelo: #f4a261;
+    --vermelho: #e76f51;
+    --cinza: #f1f5f2;
+    --texto: #1b2d23;
+    --branco: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--cinza); color: var(--texto); font-size: 14px; }
+
+  header { background: var(--verde); color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+  .semana-edit { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: white; border-radius: 6px; padding: 3px 8px; font-size: 13px; width: 180px; }
+
+  .tabs { display: flex; gap: 4px; padding: 14px 24px 0; background: var(--verde); flex-wrap: wrap; }
+  .tab { padding: 8px 16px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.65); background: transparent; border: none; transition: all .15s; }
+  .tab.active { background: var(--cinza); color: var(--verde); }
+  .tab:hover:not(.active) { color: white; }
+
+  .content { padding: 20px 24px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  h2 { font-size: 16px; font-weight: 700; color: var(--verde); margin-bottom: 12px; }
+  h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; color: #555; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  .card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e5ede8; }
+  .card.destaque { border-left: 4px solid var(--verde-claro); }
+  .card.alerta { border-left: 4px solid var(--vermelho); }
+  .card.ok { border-left: 4px solid var(--verde); }
+
+  .kpi { text-align: center; }
+  .kpi .valor { font-size: 28px; font-weight: 800; color: var(--verde); }
+  .kpi .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  .kpi .delta { font-size: 12px; margin-top: 4px; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge.verde { background: var(--verde-bg); color: var(--verde); }
+  .badge.amarelo { background: #fff3e0; color: #e65100; }
+  .badge.vermelho { background: #fdecea; color: var(--vermelho); }
+  .badge.azul { background: #e3f2fd; color: #1565c0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--cinza); padding: 8px 10px; text-align: left; font-weight: 700; color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+  td { padding: 8px 10px; border-bottom: 1px solid #eef2ef; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9fdfb; }
+
+  .post-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eef2ef; }
+  .post-item:last-child { border-bottom: none; }
+  .post-rank { font-size: 18px; font-weight: 800; color: var(--verde-claro); width: 24px; flex-shrink: 0; }
+  .post-info { flex: 1; }
+  .post-titulo { font-weight: 600; font-size: 13px; }
+  .post-meta { font-size: 12px; color: #888; margin-top: 2px; }
+  .post-stats { display: flex; gap: 12px; margin-top: 4px; font-size: 12px; flex-wrap: wrap; }
+  .stat-pill { background: var(--cinza); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+  .ideia-card { background: white; border-radius: 10px; padding: 14px; border: 1px solid #e5ede8; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; }
+  .ideia-num { font-size: 20px; font-weight: 900; color: #b7e4c7; min-width: 28px; }
+  .ideia-corpo { flex: 1; }
+  .ideia-titulo { font-weight: 700; font-size: 14px; }
+  .ideia-desc { font-size: 13px; color: #555; margin-top: 3px; }
+  .ideia-tags { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .semana-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .dia-col { background: white; border-radius: 10px; padding: 12px; border: 1px solid #e5ede8; min-height: 180px; }
+  .dia-nome { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+  .slot { background: var(--cinza); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-size: 11px; }
+  .slot.ig { border-left: 3px solid #e1306c; }
+  .slot.fb { border-left: 3px solid #1877f2; }
+  .slot.ambos { border-left: 3px solid var(--verde-claro); }
+  .slot-hora { font-size: 10px; color: #888; }
+  .slot-tipo { font-weight: 700; font-size: 10px; }
+  .slot-tema { font-size: 11px; margin-top: 2px; }
+
+  [contenteditable] { outline: none; }
+  [contenteditable]:focus { background: #fffbe6; border-radius: 4px; }
+
+  .checklist { list-style: none; }
+  .checklist li { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eef2ef; font-size: 13px; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist input[type="checkbox"] { margin-top: 2px; accent-color: var(--verde); width: 15px; height: 15px; flex-shrink: 0; }
+
+  .briefing-item { background: white; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid #e5ede8; display: flex; gap: 14px; }
+  .briefing-num { background: var(--verde); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex-shrink: 0; }
+  .briefing-corpo { flex: 1; }
+  .briefing-titulo { font-weight: 700; font-size: 14px; }
+  .briefing-desc { font-size: 13px; color: #555; margin-top: 3px; }
+
+  .tendencia { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+  .tendencia.subida { background: #e8f5e9; }
+  .tendencia.descida { background: #fdecea; }
+  .seta { font-size: 18px; line-height: 1.2; flex-shrink: 0; }
+
+  .nota { background: #fffbe6; border: 1px solid #ffe082; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #5d4037; margin-top: 10px; }
+
+  @media (max-width: 1100px) {
+    .semana-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .semana-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌿 Natureza Alternativa — Painel Redes Sociais</h1>
+    <div style="font-size:12px;opacity:.75;margin-top:4px">Associação Cultural e Desportiva · Fafe</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:11px;opacity:.7;margin-bottom:4px">Semana de</div>
+    <input class="semana-edit" id="semanaData" value="2 – 8 Jun 2026" />
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="mostrarPanel('visaogeral',this)">📊 Visão Geral</button>
+  <button class="tab" onclick="mostrarPanel('instagram',this)">📸 Instagram</button>
+  <button class="tab" onclick="mostrarPanel('facebook',this)">👥 Facebook</button>
+  <button class="tab" onclick="mostrarPanel('banco',this)">💡 Banco de Conteúdos</button>
+  <button class="tab" onclick="mostrarPanel('planeador',this)">📅 Planeador Semanal</button>
+  <button class="tab" onclick="mostrarPanel('briefing',this)">🎬 O Que Filmar</button>
+  <button class="tab" onclick="mostrarPanel('mudancas',this)">📈 O Que Mudou</button>
+</div>
+
+<div class="content">
+
+<!-- ===== VISÃO GERAL ===== -->
+<div id="visaogeral" class="panel active">
+  <h2>📊 Visão Geral — Desempenho Multiplataforma</h2>
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="card kpi">
+      <div class="valor" contenteditable>—</div>
+      <div class="label">Seguidores IG</div>
+      <div class="delta" contenteditable style="color:#888">↑ atualiza aqui</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor" contenteditable>—</div>
+      <div class="label">Seguidores FB</div>
+      <div class="delta" contenteditable style="color:#888">↑ atualiza aqui</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor" contenteditable>—%</div>
+      <div class="label">Taxa Engagement IG</div>
+      <div class="delta" contenteditable style="color:#888">meta: &gt;3%</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor" contenteditable>—%</div>
+      <div class="label">Alcance Médio FB</div>
+      <div class="delta" contenteditable style="color:#888">meta: &gt;5%</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card ok">
+      <h3>✅ O que está a funcionar</h3>
+      <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+        <li contenteditable>Reels de atividades ao ar livre</li>
+        <li contenteditable>Fotos de trilhos com paisagem natural</li>
+        <li contenteditable>Conteúdo de bastidores (preparação de eventos)</li>
+        <li contenteditable>Posts com chamada à participação</li>
+        <li contenteditable>Conteúdo de comunidade e equipa</li>
+      </ul>
+    </div>
+    <div class="card alerta">
+      <h3>⚠️ O que não está a funcionar</h3>
+      <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+        <li contenteditable>Posts só de texto sem imagem</li>
+        <li contenteditable>Publicações nos fins de semana de manhã cedo</li>
+        <li contenteditable>Conteúdo muito longo e sem apelo visual</li>
+        <li contenteditable>Posts sem hashtags ou localização</li>
+        <li contenteditable>Repost de conteúdo sem valor acrescentado</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Resumo da Semana Passada</h3>
+    <table>
+      <tr><th>Plataforma</th><th>Publicações</th><th>Alcance Total</th><th>Engagement</th><th>Melhor Post</th><th>Notas</th></tr>
+      <tr>
+        <td>📸 Instagram</td>
+        <td contenteditable>—</td>
+        <td contenteditable>—</td>
+        <td contenteditable>—</td>
+        <td contenteditable>Adicionar aqui</td>
+        <td contenteditable>—</td>
+      </tr>
+      <tr>
+        <td>👥 Facebook</td>
+        <td contenteditable>—</td>
+        <td contenteditable>—</td>
+        <td contenteditable>—</td>
+        <td contenteditable>Adicionar aqui</td>
+        <td contenteditable>—</td>
+      </tr>
+    </table>
+    <div class="nota">💡 Preenche esta tabela toda semana com os dados dos Insights de cada plataforma. 2 minutos que te dão clareza sobre o que vale a pena repetir.</div>
+  </div>
+</div>
+
+<!-- ===== INSTAGRAM ===== -->
+<div id="instagram" class="panel">
+  <h2>📸 Instagram — @natureza.alternativa <span style="font-size:12px;font-weight:400;color:#888">· Dados: 5 mai – 1 jun 2026</span></h2>
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="card kpi">
+      <div class="valor">78,8 mil</div>
+      <div class="label">Visualizações (mês)</div>
+      <div class="delta" style="color:#2d6a4f">86% de não seguidores</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">27,4 mil</div>
+      <div class="label">Alcance total</div>
+      <div class="delta" style="color:#2d6a4f">27.290 pessoas novas</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">3 mil</div>
+      <div class="label">Interações totais</div>
+      <div class="delta" style="color:#2d6a4f">66% de não seguidores</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">+207</div>
+      <div class="label">Novos seguidores</div>
+      <div class="delta" style="color:#2d6a4f">3 cancelamentos · líquido +204</div>
+    </div>
+  </div>
+
+  <!-- Métricas adicionais -->
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="card kpi">
+      <div class="valor">680</div>
+      <div class="label">Visitas ao perfil</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">13</div>
+      <div class="label">Publicações no mês</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">16</div>
+      <div class="label">Histórias no mês</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor" style="color:#e76f51">0</div>
+      <div class="label">Cliques em ligações</div>
+      <div class="delta" style="color:#e76f51">Bio sem link ativo?</div>
+    </div>
+  </div>
+
+  <!-- Alerta imediato -->
+  <div class="card alerta" style="margin-bottom:14px;background:#fdecea">
+    <h3>🚨 Ação Imediata — Cliques em Ligações = 0</h3>
+    <p style="font-size:13px;line-height:1.7">Com 680 visitas ao perfil e 0 cliques em ligações, estás a perder tráfego. Verifica se o link na bio está ativo e é relevante (ex: página de inscrições, site, Linktree com os eventos atuais). Com 207 novos seguidores, isto devia converter visitas.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card destaque">
+      <h3>🏆 Top 5 Posts — mai 2026 (por views)</h3>
+      <div class="post-item">
+        <div class="post-rank">1</div>
+        <div class="post-info">
+          <div class="post-titulo">BEM-VINDOS A CAPITAL DO ENDURO! Fafe 2026…</div>
+          <div class="post-meta">📅 Qua 13 mai, 9h34 · 🎬 Reel · publicação cruzada IG+FB</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 29,8 mil views</span>
+            <span class="stat-pill">❤️ 172</span>
+            <span class="stat-pill">↗️ 214 part.</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">2</div>
+        <div class="post-info">
+          <div class="post-titulo">Durante dois fins de semana, de 12 a 14…</div>
+          <div class="post-meta">📅 Qui 14 mai, 9h57 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 27,4 mil views</span>
+            <span class="stat-pill">❤️ 135</span>
+            <span class="stat-pill">↗️ 204 part.</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">3</div>
+        <div class="post-info">
+          <div class="post-titulo">Os bastidores também fazem parte da corrida… ⭐</div>
+          <div class="post-meta">📅 Ter 19 mai, 15h06 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 22,1 mil views</span>
+            <span class="stat-pill">❤️ 362</span>
+            <span class="stat-pill">↗️ 244 part.</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">4</div>
+        <div class="post-info">
+          <div class="post-titulo">No terreno é onde tudo começa. Seguimos a…</div>
+          <div class="post-meta">📅 Qui 21 mai, 9h56 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 14,3 mil views</span>
+            <span class="stat-pill">❤️ 295</span>
+            <span class="stat-pill">↗️ 38 part.</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">5</div>
+        <div class="post-info">
+          <div class="post-titulo">Fafe prepara-se para voltar a receber o…</div>
+          <div class="post-meta">📅 Ter 26 mai, 17h5x · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 9,1 mil views</span>
+            <span class="stat-pill">❤️ 222</span>
+            <span class="stat-pill">↗️ 67 part.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card ok" style="margin-bottom:14px">
+        <h3>✅ O que está a funcionar no IG — dados reais</h3>
+        <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+          <li><strong>Reels de eventos grandes</strong> = multiplicador de alcance (29,8k + 27,4k)</li>
+          <li><strong>Bastidores autênticos</strong> = mais gostos e partilhas que qualquer outro formato</li>
+          <li><strong>Publicação cruzada IG+FB</strong> — todos os top 5 usam isto</li>
+          <li><strong>86% alcance de não seguidores</strong> — o algoritmo está a distribuir bem</li>
+          <li><strong>Terça e Quinta às 9h–10h e 15h</strong> — dias e horas confirmados nos top posts</li>
+        </ul>
+      </div>
+      <div class="card alerta">
+        <h3>⚠️ O que não está a funcionar no IG — dados reais</h3>
+        <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+          <li><strong>Link na bio</strong> — 0 cliques com 680 visitas ao perfil</li>
+          <li><strong>Histórias IG</strong> (16 no mês) — baixo impacto vs publicações (13)</li>
+          <li><strong>Sem comentários nos top posts</strong> — engagement é de gostos e partilhas mas a conversa é fraca</li>
+          <li><strong>Sem conteúdo exclusivo IG</strong> — tudo é crosspost do FB, perdes a audiência nativa</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:14px;background:#fffbe6;border:1px solid #ffe082">
+        <h3>💡 Insight Principal IG</h3>
+        <p style="font-size:13px;line-height:1.7;color:#5d4037">"Os bastidores" tem <strong>244 partilhas</strong> — mais do que qualquer outro post em proporção de views. No IG, bastidores autênticos de corrida/evento batem anúncios gráficos em engagement real. <strong>Para crescer seguidores: mais bastidores, menos cartazes.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparação IG vs FB -->
+  <div class="card" style="margin-bottom:14px">
+    <h3>⚡ IG vs FB — Comparação Direta (mai 2026)</h3>
+    <table>
+      <tr><th>Métrica</th><th>📸 Instagram</th><th>👥 Facebook</th><th>Conclusão</th></tr>
+      <tr>
+        <td>Visualizações</td>
+        <td>78,8 mil</td>
+        <td>84,1 mil</td>
+        <td><span class="badge amarelo">FB ligeiramente mais views</span></td>
+      </tr>
+      <tr>
+        <td>Interações</td>
+        <td><strong>3.000</strong></td>
+        <td>1.500</td>
+        <td><span class="badge verde">IG tem 2x mais interações</span></td>
+      </tr>
+      <tr>
+        <td>Novos seguidores</td>
+        <td><strong>207</strong></td>
+        <td>69</td>
+        <td><span class="badge verde">IG cresce 3x mais rápido</span></td>
+      </tr>
+      <tr>
+        <td>Alcance de não seguidores</td>
+        <td><strong>86%</strong></td>
+        <td>81%</td>
+        <td><span class="badge verde">IG chega a mais pessoas novas</span></td>
+      </tr>
+      <tr>
+        <td>Cliques em ligações</td>
+        <td style="color:#e76f51">0</td>
+        <td>1.200 visitas</td>
+        <td><span class="badge vermelho">FB converte melhor em tráfego</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>⏰ Melhores Horários para Publicar no IG — padrão observado</h3>
+    <table>
+      <tr><th>Dia</th><th>Melhor hora</th><th>2ª opção</th><th>Tipo recomendado</th></tr>
+      <tr><td>Segunda</td><td contenteditable>—</td><td contenteditable>—</td><td contenteditable>Sem dados ainda — testar 19h</td></tr>
+      <tr><td><strong>Terça ⭐</strong></td><td><strong>15h</strong></td><td>—</td><td><strong>Reel de bastidores / equipa</strong> (confirmado)</td></tr>
+      <tr><td><strong>Quarta ⭐</strong></td><td><strong>9h–10h</strong></td><td>—</td><td><strong>Reel de evento / anúncio grande</strong> (confirmado)</td></tr>
+      <tr><td><strong>Quinta ⭐</strong></td><td><strong>9h–10h</strong></td><td>—</td><td><strong>Reel de terreno / ação</strong> (confirmado)</td></tr>
+      <tr><td>Sexta</td><td contenteditable>15h–17h</td><td contenteditable>—</td><td contenteditable>Anúncio evento fim-de-semana</td></tr>
+      <tr><td>Sábado</td><td contenteditable>—</td><td contenteditable>—</td><td contenteditable>Sem dados — testar registo ao vivo</td></tr>
+      <tr><td>Domingo</td><td contenteditable>—</td><td contenteditable>—</td><td contenteditable>Sem dados — testar resumo visual</td></tr>
+    </table>
+    <div class="nota">⭐ Terça, Quarta e Quinta são os teus dias de ouro no Instagram. Os 5 posts com mais views foram publicados entre Terça e Quinta, maioritariamente de manhã (9h–10h) ou a meio da tarde (15h).</div>
+  </div>
+</div>
+
+<!-- ===== FACEBOOK ===== -->
+<div id="facebook" class="panel">
+  <h2>👥 Facebook — Natureza Alternativa | Fafe <span style="font-size:12px;font-weight:400;color:#888">· Dados: 5 mai – 1 jun 2026</span></h2>
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="card kpi">
+      <div class="valor">84,1 mil</div>
+      <div class="label">Visualizações (mês)</div>
+      <div class="delta" style="color:#2d6a4f">↑ 7,2% vs mês anterior</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">34.375</div>
+      <div class="label">Visualizadores únicos</div>
+      <div class="delta" style="color:#2d6a4f">↑ 16,1 mil%</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">1,5 mil</div>
+      <div class="label">Interações totais</div>
+      <div class="delta" style="color:#2d6a4f">↑ 145,6 mil%</div>
+    </div>
+    <div class="card kpi">
+      <div class="valor">+69</div>
+      <div class="label">Novos seguidores (líquido)</div>
+      <div class="delta" style="color:#2d6a4f">↑ 475% · 73 entradas, 4 saídas</div>
+    </div>
+  </div>
+
+  <!-- Formatos -->
+  <div class="card" style="margin-bottom:14px">
+    <h3>📊 Desempenho por Formato (mai–jun 2026)</h3>
+    <table>
+      <tr><th>Formato</th><th>Publicados</th><th>Visualizações</th><th>Interações</th><th>Conclusão</th></tr>
+      <tr>
+        <td><strong>🎬 Reels</strong></td>
+        <td>8</td>
+        <td><strong>41.922</strong></td>
+        <td><strong>718</strong></td>
+        <td><span class="badge verde">Formato #1 — prioridade máxima</span></td>
+      </tr>
+      <tr>
+        <td>📷 Fotos</td>
+        <td>8</td>
+        <td>31.605</td>
+        <td>505</td>
+        <td><span class="badge verde">Forte — manter</span></td>
+      </tr>
+      <tr>
+        <td>🖼️ Vários conteúdos (álbum)</td>
+        <td>—</td>
+        <td>5.830</td>
+        <td>94</td>
+        <td><span class="badge amarelo">Médio — usar para eventos</span></td>
+      </tr>
+      <tr>
+        <td>📖 Histórias</td>
+        <td>3</td>
+        <td>—</td>
+        <td>12</td>
+        <td><span class="badge vermelho">Alcance zero no FB — evitar</span></td>
+      </tr>
+      <tr>
+        <td>📝 Texto</td>
+        <td>—</td>
+        <td>36</td>
+        <td>—</td>
+        <td><span class="badge vermelho">Não usar</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card destaque">
+      <h3>🏆 Top 5 Posts — mai 2026</h3>
+      <div class="post-item">
+        <div class="post-rank">1</div>
+        <div class="post-info">
+          <div class="post-titulo">BEM-VINDOS A CAPITAL DO ENDURO! Fafe 2026…</div>
+          <div class="post-meta">📅 Qua 13 mai, 9h34 · 🎬 Reel · publicação cruzada IG+FB</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 29,8 mil views</span>
+            <span class="stat-pill">❤️ 172</span>
+            <span class="stat-pill">↗️ 214 partilhas</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">2</div>
+        <div class="post-info">
+          <div class="post-titulo">Durante dois fins de semana, de 12 a 14…</div>
+          <div class="post-meta">📅 Qui 14 mai, 9h57 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 27,4 mil views</span>
+            <span class="stat-pill">❤️ 135</span>
+            <span class="stat-pill">↗️ 204 partilhas</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">3</div>
+        <div class="post-info">
+          <div class="post-titulo">Os bastidores também fazem par… ⭐</div>
+          <div class="post-meta">📅 Ter 19 mai, 15h06 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 22.126 views</span>
+            <span class="stat-pill">👥 4.365 alcance</span>
+            <span class="stat-pill">❤️ 362 gostos</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">4</div>
+        <div class="post-info">
+          <div class="post-titulo">O teu reel</div>
+          <div class="post-meta">📅 Qua 27 mai, 7h56 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 16.336 views</span>
+            <span class="stat-pill">👥 7.714 alcance</span>
+            <span class="stat-pill">❤️ 202 gostos</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-item">
+        <div class="post-rank">5</div>
+        <div class="post-info">
+          <div class="post-titulo">No terreno é onde tudo começa. Seguimos a…</div>
+          <div class="post-meta">📅 Qui 21 mai, 9h57 · 🎬 Reel · publicação cruzada</div>
+          <div class="post-stats">
+            <span class="stat-pill">👁️ 14.320 views</span>
+            <span class="stat-pill">👥 5.003 alcance</span>
+            <span class="stat-pill">❤️ 295 gostos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card ok" style="margin-bottom:14px">
+        <h3>✅ O que está a funcionar no FB — dados reais</h3>
+        <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+          <li><strong>Reels de eventos grandes</strong> (Enduro GP → 29,8k + 27,4k views)</li>
+          <li><strong>Publicação cruzada IG+FB</strong> — todos os top posts usam isto</li>
+          <li><strong>Reel autêntico em terreno</strong> ("O teu reel" → 16k views, 202 gostos)</li>
+          <li><strong>Conteúdo de equipa e bastidores</strong> (Equipa de milhões → 8k views)</li>
+          <li><strong>Partilhas</strong> como motor viral — posts top: 200+ partilhas cada</li>
+          <li><strong>Hora: manhã cedo</strong> (7h–10h) funciona melhor que noite nos tops</li>
+        </ul>
+      </div>
+      <div class="card alerta">
+        <h3>⚠️ O que não está a funcionar no FB — dados reais</h3>
+        <ul style="padding-left:16px;font-size:13px;line-height:2.1">
+          <li><strong>Histórias no Facebook</strong> — alcance = 0, interações = 12 em 3 stories</li>
+          <li><strong>Posts de texto</strong> — apenas 36 visualizações</li>
+          <li><strong>Conteúdo sem ligação a evento ou emoção</strong> — baixo alcance</li>
+          <li><strong>Reels com baixo contexto</strong> ("Ainda nos lembramos…" → 3.554 vs 29k dos top)</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:14px;background:#fffbe6;border:1px solid #ffe082">
+        <h3>💡 Insight Principal deste Mês</h3>
+        <p style="font-size:13px;line-height:1.7;color:#5d4037">Tens <strong>dois motores de alcance</strong> distintos: (1) <strong>Eventos grandes</strong> — o Enduro GP gerou ~57k views em 2 posts com 400+ partilhas; (2) <strong>Bastidores autênticos</strong> — "Os bastidores também fazem par…" (Ter 15h) foi o 3.º maior post com 22k views e 362 gostos, superando muitos reels de evento. <strong>Combina os dois: bastidores de preparação de eventos = fórmula de ouro.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⏰ Melhores Horários para Publicar no FB — padrão observado</h3>
+    <table>
+      <tr><th>Dia</th><th>Melhor hora</th><th>2ª opção</th><th>Tipo recomendado</th></tr>
+      <tr><td>Segunda</td><td>14h–15h</td><td>18h</td><td>Anúncio de atividade / arranque de semana</td></tr>
+      <tr><td>Terça</td><td>17h–18h</td><td>—</td><td>Reel de terreno / natureza</td></tr>
+      <tr><td><strong>Quarta ⭐</strong></td><td><strong>7h–10h</strong></td><td>14h</td><td><strong>Reel principal da semana</strong> (melhor dia nos dados)</td></tr>
+      <tr><td><strong>Quinta ⭐</strong></td><td><strong>9h–10h</strong></td><td>—</td><td><strong>Anúncio de evento / reel de destaque</strong></td></tr>
+      <tr><td>Sexta</td><td>15h–17h</td><td>—</td><td>Reel de memórias / retrospetiva</td></tr>
+      <tr><td>Sábado</td><td>20h–21h</td><td>—</td><td>Álbum ou vários conteúdos pós-evento</td></tr>
+      <tr><td>Domingo</td><td contenteditable>—</td><td contenteditable>—</td><td contenteditable>Sem padrão claro ainda — testar</td></tr>
+    </table>
+    <div class="nota">⭐ Quarta e Quinta de manhã são os teus dias de ouro no Facebook. Os 3 posts com mais visualizações foram publicados entre as 7h e as 10h nestes dois dias.</div>
+  </div>
+</div>
+
+<!-- ===== BANCO DE CONTEÚDOS ===== -->
+<div id="banco" class="panel">
+  <h2>💡 Banco de Conteúdos — 10 Ideias dos Teus Padrões de Sucesso</h2>
+  <p style="color:#555;font-size:13px;margin-bottom:16px">Baseado no perfil da Natureza Alternativa (associação cultural e desportiva, natureza, Fafe). Clica em qualquer campo para editar.</p>
+
+  <div class="ideia-card">
+    <div class="ideia-num">01</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Reel "Trilho da Semana"</div>
+      <div class="ideia-desc" contenteditable>30 segundos. Começa com a paisagem mais bonita do trilho. Texto em ecrã: nome, distância, dificuldade. Termina com chamada: "Queres vir connosco? Comenta SIM."</div>
+      <div class="ideia-tags"><span class="badge verde">Reel</span><span class="badge azul">IG + FB</span><span class="badge amarelo">Alta conversão</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">02</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Carrossel "Antes e Depois de um Evento"</div>
+      <div class="ideia-desc" contenteditable>Slide 1: preparação (material, equipa). Slides 2–6: fotos do evento. Último slide: agradecimento + próxima data. Humaniza a associação e gera partilha.</div>
+      <div class="ideia-tags"><span class="badge verde">Carrossel</span><span class="badge azul">IG</span><span class="badge verde">Comunidade</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">03</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Vídeo "Apresenta um Membro da Equipa"</div>
+      <div class="ideia-desc" contenteditable>60 segundos. 3 perguntas rápidas: quem és, porque adoras a natureza, o teu trilho favorito perto de Fafe. Rostos humanos = engagement alto.</div>
+      <div class="ideia-tags"><span class="badge verde">Vídeo</span><span class="badge azul">IG + FB</span><span class="badge verde">Pessoas</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">04</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Story Sondagem "Próxima Atividade"</div>
+      <div class="ideia-desc" contenteditable>Duas opções: ex. "Kayak 🛶 ou Trilho 🥾?" Usa o resultado para programar o próximo evento. Mostra o resultado na semana seguinte — fecha o ciclo e cria hábito.</div>
+      <div class="ideia-tags"><span class="badge amarelo">Story</span><span class="badge azul">IG</span><span class="badge verde">Interação</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">05</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Post "Curiosidade Natural de Fafe"</div>
+      <div class="ideia-desc" contenteditable>Foto de uma espécie de planta, animal ou local geológico da região. Legenda: "Sabias que...?" Educa, é partilhável, posiciona como autoridade local de natureza.</div>
+      <div class="ideia-tags"><span class="badge verde">Foto</span><span class="badge azul">IG + FB</span><span class="badge amarelo">Educativo</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">06</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Reel "Pôr do Sol / Amanhecer num Trilho"</div>
+      <div class="ideia-desc" contenteditable>Clip de 15s com música ambiente. Zero texto necessário. Máximo impacto visual. Funciona sempre que tiveres uma boa luz. Time-lapse funciona muito bem.</div>
+      <div class="ideia-tags"><span class="badge verde">Reel</span><span class="badge azul">IG</span><span class="badge verde">Visual</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">07</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Álbum "O Melhor de [Mês]"</div>
+      <div class="ideia-desc" contenteditable>10–15 fotos do mês. Funciona muito bem no Facebook para alcance orgânico. No Instagram faz como carrossel com destaque nos rostos das pessoas presentes.</div>
+      <div class="ideia-tags"><span class="badge verde">Álbum</span><span class="badge azul">FB + IG</span><span class="badge verde">Arquivo</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">08</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Post "Inscrições Abertas"</div>
+      <div class="ideia-desc" contenteditable>Foto de fundo da atividade, texto em cima com data, hora, vagas limitadas. Cria urgência com "X vagas disponíveis". Publica 2 semanas antes e volta a publicar 3 dias antes.</div>
+      <div class="ideia-tags"><span class="badge vermelho">Anúncio</span><span class="badge azul">IG + FB</span><span class="badge amarelo">Conversão</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">09</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Repost de Participante (UGC)</div>
+      <div class="ideia-desc" contenteditable>Partilha uma foto de um membro com a tua associação tagada. Pede autorização. Conteúdo gerado por utilizadores tem 4x mais alcance orgânico e credibilidade.</div>
+      <div class="ideia-tags"><span class="badge verde">UGC</span><span class="badge azul">IG + FB</span><span class="badge verde">Comunidade</span></div>
+    </div>
+  </div>
+
+  <div class="ideia-card">
+    <div class="ideia-num">10</div>
+    <div class="ideia-corpo">
+      <div class="ideia-titulo" contenteditable>Reel "Guia Rápido — Como Preparar a Mochila"</div>
+      <div class="ideia-desc" contenteditable>30–45 segundos. Mostra 5–7 itens essenciais para um trilho de dia. Termina com "Guardaste este vídeo? Partilha com alguém que precisa de saber."</div>
+      <div class="ideia-tags"><span class="badge verde">Reel</span><span class="badge azul">IG</span><span class="badge amarelo">Educativo</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLANEADOR SEMANAL ===== -->
+<div id="planeador" class="panel">
+  <h2>📅 Planeador Semanal — Ritmo de Conteúdos</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:14px">Clica em qualquer campo para editar. Borda rosa = Instagram · Azul = Facebook · Verde = Ambas</p>
+
+  <div class="semana-grid">
+    <div class="dia-col">
+      <div class="dia-nome">Segunda</div>
+      <div class="slot ambos">
+        <div class="slot-hora" contenteditable>19h00</div>
+        <div class="slot-tipo">📸 IG + 👥 FB</div>
+        <div class="slot-tema" contenteditable>Reel da atividade ou anúncio da semana</div>
+      </div>
+      <div class="slot ig" style="margin-top:6px">
+        <div class="slot-hora" contenteditable>21h00</div>
+        <div class="slot-tipo">📸 IG Story</div>
+        <div class="slot-tema" contenteditable>Sondagem ou pergunta à comunidade</div>
+      </div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Terça</div>
+      <div class="slot ig">
+        <div class="slot-hora" contenteditable>19h00</div>
+        <div class="slot-tipo">📸 IG</div>
+        <div class="slot-tema" contenteditable>Foto de trilho / paisagem</div>
+      </div>
+      <div class="nota" style="font-size:11px;margin-top:8px;padding:6px">Dia mais leve — sem FB obrigatório</div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Quarta</div>
+      <div class="slot ambos">
+        <div class="slot-hora" contenteditable>12h00</div>
+        <div class="slot-tipo">📸 IG + 👥 FB</div>
+        <div class="slot-tema" contenteditable>Carrossel educativo ou curiosidade</div>
+      </div>
+      <div class="slot ig" style="margin-top:6px">
+        <div class="slot-hora" contenteditable>19h30</div>
+        <div class="slot-tipo">📸 IG Story</div>
+        <div class="slot-tema" contenteditable>Bastidores ou preparação de evento</div>
+      </div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Quinta</div>
+      <div class="slot fb">
+        <div class="slot-hora" contenteditable>19h00</div>
+        <div class="slot-tipo">👥 FB</div>
+        <div class="slot-tema" contenteditable>Post de comunidade / equipa</div>
+      </div>
+      <div class="nota" style="font-size:11px;margin-top:8px;padding:6px">Dia para conteúdo mais pessoal</div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Sexta</div>
+      <div class="slot ambos">
+        <div class="slot-hora" contenteditable>17h30</div>
+        <div class="slot-tipo">📸 IG + 👥 FB</div>
+        <div class="slot-tema" contenteditable>Anúncio evento fim-de-semana</div>
+      </div>
+      <div class="slot ig" style="margin-top:6px">
+        <div class="slot-hora" contenteditable>21h00</div>
+        <div class="slot-tipo">📸 IG Story</div>
+        <div class="slot-tema" contenteditable>"Estão prontos para amanhã?"</div>
+      </div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Sábado</div>
+      <div class="slot ig">
+        <div class="slot-hora" contenteditable>Durante evento</div>
+        <div class="slot-tipo">📸 IG Story ao vivo</div>
+        <div class="slot-tema" contenteditable>Registo em tempo real</div>
+      </div>
+      <div class="slot ig" style="margin-top:6px">
+        <div class="slot-hora" contenteditable>18h00</div>
+        <div class="slot-tipo">📸 IG Reel</div>
+        <div class="slot-tema" contenteditable>Clip rápido do evento do dia</div>
+      </div>
+    </div>
+    <div class="dia-col">
+      <div class="dia-nome">Domingo</div>
+      <div class="slot fb">
+        <div class="slot-hora" contenteditable>18h00</div>
+        <div class="slot-tipo">👥 FB</div>
+        <div class="slot-tema" contenteditable>Álbum de fotos do fim-de-semana</div>
+      </div>
+      <div class="slot ig" style="margin-top:6px">
+        <div class="slot-hora" contenteditable>19h00</div>
+        <div class="slot-tipo">📸 IG</div>
+        <div class="slot-tema" contenteditable>Melhor foto do fim-de-semana</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nota" style="margin-top:16px">📌 <strong>Ritmo ideal:</strong> 4–5 posts/semana no Instagram · 3–4 posts/semana no Facebook · Stories diários quando possível. Consistência bate quantidade.</div>
+</div>
+
+<!-- ===== O QUE FILMAR ===== -->
+<div id="briefing" class="panel">
+  <h2>🎬 O Que Filmar Esta Semana — Briefing de Ação</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:16px">Semana de <strong id="semanaDataBriefing">2 – 8 Jun 2026</strong> · Edita conforme os teus eventos reais desta semana.</p>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <div>
+      <div class="briefing-item">
+        <div class="briefing-num">1</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>🎥 Reel principal da semana</div>
+          <div class="briefing-desc" contenteditable>Filma: ação no trilho ou atividade. Duração: 15–30s. Captura: plano aberto da paisagem + plano próximo de rostos a sorrir + plano do grupo em movimento. Hora ideal: final do dia para luz dourada.</div>
+        </div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-num">2</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>📷 Foto de destaque para feed</div>
+          <div class="briefing-desc" contenteditable>1 foto de alto impacto. Prioriza: panorâmica com pessoa em primeiro plano, ou grupo com sorriso genuíno. Sem flash. Luz natural, hora dourada ou hora azul.</div>
+        </div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-num">3</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>📱 Stories do evento (no local)</div>
+          <div class="briefing-desc" contenteditable>3–5 stories durante o evento. Mix de: boomerang, vídeo curto, foto com sticker de localização. Faz 1 story de chegada + 1 durante + 1 de encerramento.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="briefing-item">
+        <div class="briefing-num">4</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>🎙️ Entrevista rápida (opcional)</div>
+          <div class="briefing-desc" contenteditable>30–60 segundos. Pergunta a um participante: "O que mais gostaste hoje?" Vídeo vertical, rosto em foco, fundo natural. Pede autorização antes de filmar.</div>
+        </div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-num">5</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>🌿 Detalhe de natureza</div>
+          <div class="briefing-desc" contenteditable>1 clip ou foto de detalhe: folha, flor, pedra, riacho. Serve para post de curiosidade ou como B-roll do Reel. 5 segundos de vídeo chegam.</div>
+        </div>
+      </div>
+      <div class="briefing-item">
+        <div class="briefing-num">6</div>
+        <div class="briefing-corpo">
+          <div class="briefing-titulo" contenteditable>📦 Material de arquivo</div>
+          <div class="briefing-desc" contenteditable>Filma a preparação: mochilas, equipamento, mapa, briefing antes do evento. Vai servir para conteúdo de bastidores em semanas com menos atividade.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h3>📝 Notas Específicas desta Semana</h3>
+    <div contenteditable style="min-height:80px;font-size:13px;color:#555;line-height:1.8;padding:6px 4px">
+      Escreve aqui o que tens planeado esta semana: atividades, eventos, datas especiais, parceiros. Quanto mais específico, melhor o conteúdo.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Checklist de Filmagem</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> Telemóvel carregado ou bateria extra</li>
+      <li><input type="checkbox"> Espaço suficiente no telemóvel (mínimo 10GB livres)</li>
+      <li><input type="checkbox"> Filmar sempre em vertical (9:16) para Stories e Reels</li>
+      <li><input type="checkbox"> Capturar plano aberto + plano médio + plano próximo</li>
+      <li><input type="checkbox"> Ativar geolocalização no telemóvel</li>
+      <li><input type="checkbox"> Pedir autorização para filmar participantes</li>
+      <li><input type="checkbox"> Fazer pelo menos 1 story em tempo real durante o evento</li>
+      <li><input type="checkbox"> Guardar os melhores clips numa pasta "Para publicar"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== O QUE MUDOU ===== -->
+<div id="mudancas" class="panel">
+  <h2>📈 O Que Mudou — Tendências e Lista de Ações</h2>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <h3>🚀 Tópicos em Ascensão</h3>
+      <div class="tendencia subida">
+        <span class="seta">↑</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Trilhos para famílias com crianças</div>
+          <div style="font-size:11px;color:#555" contenteditable>Procura crescente no verão · Oportunidade de captar novos seguidores</div>
+        </div>
+      </div>
+      <div class="tendencia subida">
+        <span class="seta">↑</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Turismo de natureza na região do Minho</div>
+          <div style="font-size:11px;color:#555" contenteditable>Tendência nacional · Posiciona a NA como referência local</div>
+        </div>
+      </div>
+      <div class="tendencia subida">
+        <span class="seta">↑</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Reels curtos com som ambiente natural</div>
+          <div style="font-size:11px;color:#555" contenteditable>Algoritmo IG prioriza som original em vez de música</div>
+        </div>
+      </div>
+      <div class="tendencia subida">
+        <span class="seta">↑</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Saúde mental e contacto com a natureza</div>
+          <div style="font-size:11px;color:#555" contenteditable>Ângulo editorial com alto potencial de partilha</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📉 Tópicos em Declínio</h3>
+      <div class="tendencia descida">
+        <span class="seta">↓</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Posts informativos longos sem imagem</div>
+          <div style="font-size:11px;color:#555" contenteditable>Engagement caiu · Substituir por carrossel ou reel</div>
+        </div>
+      </div>
+      <div class="tendencia descida">
+        <span class="seta">↓</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Hashtags genéricas (#natureza #portugal)</div>
+          <div style="font-size:11px;color:#555" contenteditable>Muito competitivas · Focar em #fafe #minho #trilhospt</div>
+        </div>
+      </div>
+      <div class="tendencia descida">
+        <span class="seta">↓</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Conteúdo muito formal / institucional</div>
+          <div style="font-size:11px;color:#555" contenteditable>Audiência prefere autenticidade e bastidores</div>
+        </div>
+      </div>
+      <div class="tendencia descida">
+        <span class="seta">↓</span>
+        <div>
+          <div style="font-weight:700" contenteditable>Links externos no corpo do post FB</div>
+          <div style="font-size:11px;color:#555" contenteditable>Facebook penaliza alcance · Colocar link no 1.º comentário</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h3>✅ Lista de Verificação de Ações — Esta Semana</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> Verificar métricas dos posts da semana passada (IG + FB Insights)</li>
+      <li><input type="checkbox"> Atualizar os KPIs na aba Visão Geral</li>
+      <li><input type="checkbox"> Identificar o post com mais alcance e perceber porquê</li>
+      <li><input type="checkbox"> Publicar pelo menos 1 Reel no Instagram esta semana</li>
+      <li><input type="checkbox"> Criar 1 Evento no Facebook (se houver atividade)</li>
+      <li><input type="checkbox"> Responder a todos os comentários das últimas 48h</li>
+      <li><input type="checkbox"> Fazer pelo menos 3 stories no Instagram esta semana</li>
+      <li><input type="checkbox"> Verificar se há conteúdo UGC para repostar (com autorização)</li>
+      <li><input type="checkbox"> Planear o conteúdo da semana seguinte no Planeador</li>
+      <li><input type="checkbox"> <span contenteditable>Ação específica desta semana — edita aqui</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🔮 Próximos Eventos / Datas a Planear</h3>
+    <table>
+      <tr><th>Data</th><th>Evento</th><th>Conteúdo a criar</th><th>Publicar em</th><th>Estado</th></tr>
+      <tr>
+        <td contenteditable>—</td>
+        <td contenteditable>Adicionar evento aqui</td>
+        <td contenteditable>Anúncio + Reel</td>
+        <td contenteditable>IG + FB</td>
+        <td><span class="badge amarelo">A planear</span></td>
+      </tr>
+      <tr>
+        <td contenteditable>—</td>
+        <td contenteditable>Adicionar evento aqui</td>
+        <td contenteditable>Álbum + Stories</td>
+        <td contenteditable>FB + IG</td>
+        <td><span class="badge verde">Confirmado</span></td>
+      </tr>
+      <tr>
+        <td contenteditable>—</td>
+        <td contenteditable>Adicionar evento aqui</td>
+        <td contenteditable>—</td>
+        <td contenteditable>—</td>
+        <td><span class="badge vermelho">Urgente</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+  function mostrarPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+  document.getElementById('semanaData').addEventListener('input', function() {
+    document.getElementById('semanaDataBriefing').textContent = this.value;
+  });
+</script>
+</body>
+</html>
